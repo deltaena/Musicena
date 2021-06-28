@@ -1,59 +1,62 @@
 package com.deltaena.mainmenu
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.deltaena.common.DeezerService
+import com.deltaena.common.pojos.Playlist
+import com.deltaena.common.pojos.PlaylistList
+import com.deltaena.common.pojos.Track
+import com.deltaena.mainmenu.databinding.FragmentMainmenuBinding
+import com.google.android.material.snackbar.Snackbar
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [MainmenuFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class MainmenuFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+
+    private val TAG = "MainmenuFragment"
+
+    lateinit var binding: FragmentMainmenuBinding
+
+    val deezerService: DeezerService by lazy {
+        val deezerServiceBaseUrl = resources.getString(R.string.deezerServiceBaseUrl)
+        val retrofit = Retrofit.Builder().
+            baseUrl(deezerServiceBaseUrl).
+            addConverterFactory(GsonConverterFactory.create()).
+            build()
+
+        retrofit.create(DeezerService::class.java)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+
+        val call = deezerService.getPlaylists(resources.getString(R.string.userDeezerId))
+
+        call.enqueue(object: Callback<PlaylistList>{
+            override fun onResponse(call: Call<PlaylistList>, response: Response<PlaylistList>) {
+                binding.textView.text = "fetched "+response.body()?.data?.size+" songs"
+            }
+
+            override fun onFailure(call: Call<PlaylistList>, t: Throwable) {
+                Snackbar.make(requireView(), t.message.toString(), Snackbar.LENGTH_LONG).show()
+            }
+        })
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_mainmenu, container, false)
+    ): View {
+        binding = FragmentMainmenuBinding.inflate(inflater)
+
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment MainmenuFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            MainmenuFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
-    }
 }

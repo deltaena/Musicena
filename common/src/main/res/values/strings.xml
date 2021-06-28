@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="deezerServiceBaseUrl">https://api.deezer.com/</string>
+    <string name="userDeezerId">2606204422</string>
+</resources>
