@@ -1,3 +1,4 @@
 rootProject.name = "Musicena"
 include ':app'
 include ':mainmenu'
+include ':common'
